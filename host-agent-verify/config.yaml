@@ -1,0 +1,11 @@
+# Config file with necessary information to run Host Agent Attacker and Host Agent Verifier
+agent_manager_ip: "10.0.2.4"
+agent_manager_port: "3366"
+unknown_host_ip: "10.0.0.250"
+host_ip1: "10.0.0.1"
+host_ip2: "10.0.0.2"
+host_ip3: "10.0.0.3"
+host_username: "host-agent"
+host_password: "123"
+flood_packet_count: "10"
+script_path: '/home/host-agent/host-agent-verify/ping_host.py'
