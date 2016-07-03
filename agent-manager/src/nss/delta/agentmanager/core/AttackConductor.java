@@ -2,6 +2,7 @@ package nss.delta.agentmanager.core;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import nss.delta.agentmanager.targetcon.ControllerManager;
 import nss.delta.agentmanager.testcase.TestAdvancedCase;
+//CHANGE HERE
+import nss.delta.agentmanager.testcase.LayerTwoTestAdvancedCase;
 import nss.delta.agentmanager.testcase.TestInfo;
 import nss.delta.agentmanager.testcase.TestSwitchCase;
 import nss.delta.agentmanager.utils.ProgressBar;
@@ -30,13 +33,19 @@ public class AttackConductor {
 	private HostAgentManager hostm;
 	private ChannelAgentManager channelm;
 	private ControllerManager controllerm;
+//CHANGE HERE
+        private LayerTwoHostAgentManager layer2Hostm;
 
 	private Configuration cfg;
 
 	private DataOutputStream dos;
 	private DataInputStream dis;
+	private BufferedReader inReader;
+	private PrintWriter outWriter;
 
 	private TestAdvancedCase testAdvancedCase;
+//CHANGE HERE
+	private LayerTwoTestAdvancedCase layerTwoTestAdvancedCase;
 	private TestSwitchCase testSwitchCase;
 
 	public AttackConductor(String config) {
@@ -53,6 +62,8 @@ public class AttackConductor {
 
 		this.hostm = new HostAgentManager();
 		this.channelm = new ChannelAgentManager();
+//CHANGE HERE
+                this.layer2Hostm = new LayerTwoHostAgentManager();
 
 		/* Update Test Cases */
 		TestInfo.updateAdvancedCase(infoAdvancedCase);
@@ -60,6 +71,8 @@ public class AttackConductor {
 		TestInfo.updateSwitchCase(infoSwitchCase);
 
 		testAdvancedCase = new TestAdvancedCase(appm, hostm, channelm, controllerm);
+//CHANGE HERE
+		layerTwoTestAdvancedCase = new LayerTwoTestAdvancedCase(layer2Hostm);
 		testSwitchCase = new TestSwitchCase();
 	}
 
@@ -68,11 +81,12 @@ public class AttackConductor {
 	}
 
 	public void setSocket(Socket socket) throws IOException {
+		
 		dos = new DataOutputStream(socket.getOutputStream());
 		dis = new DataInputStream(socket.getInputStream());
-
-		String agentType = dis.readUTF();
-
+		
+		String agentType = dis.readUTF();//inReader.readLine();//dis.readUTF();
+		
 		if (agentType.contains("AppAgent")) {
 			appm.setAppSocket(socket, dos, dis);
 		} else if (agentType.contains("ActAgent")) { /* for OpenDaylight */
@@ -83,8 +97,13 @@ public class AttackConductor {
 			channelm.write("config," + "version:" + cfg.getOFVer() + ",nic:" + cfg.getMitmNIC() + ",port:"
 					+ cfg.getOFPort() + ",controller_ip:" + cfg.getControllerIP() + ",switch_ip:" + cfg.getSwitchIP());
 
-		} else if (agentType.contains("HostAgent")) {
-			hostm.setSocket(socket, dos, dis);
+		} 
+		else if (agentType.contains("L2HostAgent")) {
+			//CHANGE HERE
+			layer2Hostm.setSocket(socket, dos, dis);
+
+		}else if (agentType.contains("HostAgent")) {
+			hostm.setSocket(socket, dos, dis);			
 		}
 	}
 
@@ -93,6 +112,11 @@ public class AttackConductor {
 			testSwitchCase.replayKnownAttack(code);
 		if (code.charAt(0) == '3')
 			testAdvancedCase.replayKnownAttack(code);
+	}
+
+//CHANGE HERE
+	public String generateFlow(String code) {
+		return layerTwoTestAdvancedCase.generateFlow(code);
 	}
 
 	public void printAttackList() {

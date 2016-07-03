@@ -30,6 +30,8 @@ public class AgentManager extends Thread {
 			System.out.println(" [cC]\t- Show configuration info");
 			System.out.println(" [kK]\t- Replaying known attack(s)");
 			System.out.println(" [uU]\t- Finding an unknown attack");
+			//CHANGE HERE			
+			System.out.println(" [lL]\t- Layer 2 attack(s)");
 			System.out.println(" [qQ]\t- Quit\n");
 			System.out.print("\nCommand> ");
 
@@ -73,9 +75,37 @@ public class AgentManager extends Thread {
 
 			System.out.print("\nSelect target control message> ");
 			input = sc.readLine();
+		} else if (in.equalsIgnoreCase("L")) {
+			//CHANGE HERE - added else if for H
+			while(true){
+				System.out.println("\n [7.0.1]\t- Simple ARP Flooding");
+				System.out.println(" [7.0.2]\t- Flooding ARP: Unknown Destination");
+				System.out.println(" [7.1.1]\t- Flooding ARP: RANDOM SMAC to unknown Destination");
+				System.out.println(" [7.1.2]\t- Flooding ARP: RANDOM SMAC to known Destination");
+				System.out.println(" [7.2.1]\t- ARP Poisoning in Switch: Unknown Destination");
+				System.out.println(" [7.2.2]\t- ARP Poisoning in Switch: Known Destination");
+				System.out.println(" [7.3.1]\t- ARP Poisoning in Host: Known Destination");
+				System.out.println(" [7.4.1]\t- DHCP Attack *");
+				System.out.println(" [7.5.1]\t- VLAN Attack *");
+				System.out.println(" [qQ]\t- To quit Layer 2 attack");
+				System.out.print("\nSelect target Test> ");
+				input = sc.readLine();
+				if (input.equalsIgnoreCase("q")) {
+					break;
+				}
+				System.out.print("\nTest started, please wait... ");
+				String result = conductor.generateFlow(input);
+				System.out.println("\nResult:" + result);
+				System.out.print("\nPress ENTER key to continue..");
+				input = sc.readLine();
+			}
+			
 		}
 		return true;
 	}
+
+	
+
 
 	public void closeServerSocket() {
 		try {
@@ -91,7 +121,9 @@ public class AgentManager extends Thread {
 		try {
 			listenAgent = new ServerSocket(portNum);
 			while (true) {
+				
 				Socket temp = listenAgent.accept();
+				
 				conductor.setSocket(temp);
 			}
 		} catch (IOException e) {
